@@ -1,0 +1,15 @@
+﻿# UI/UX Pro Max: фактическое применение
+- Прочитан C:/Users/kliod/.agents/skills/ui-ux-pro-max/SKILL.md; версия/commit установки не установлены.
+- Использован существующий scripts/search.py в том же каталоге, без установки и сетевых запросов.
+- В PowerShell установлен PYTHONIOENCODING=utf-8 для вывода; команды выполнены из корня SQOCH.
+- python C:/Users/kliod/.agents/skills/ui-ux-pro-max/scripts/search.py "event ticket checkout minimal" --design-system -p "SQOCH Checkout" -f markdown
+- Результат: Hero-Centric Design, Vibrant & Block-based, фиолетовый/оранжевый; компоновка не подходит форме.
+- python C:/Users/kliod/.agents/skills/ui-ux-pro-max/scripts/search.py "checkout form minimal accessible" --design-system -p "SQOCH Checkout" -f markdown
+- Уточнение: Minimalism & Swiss Style принят; Product Demo + Features снова не подходит checkout, проверенного подходящего layout в выдаче нет, сетка выбрана по UX_BRIEF.
+- Светлый teal затемнен до #0F766E под белый текст; второй акцент и внешние Atkinson/Inter/Playfair отклонены.
+- python C:/Users/kliod/.agents/skills/ui-ux-pro-max/scripts/search.py "error summary validation" --domain ux
+- Получены Focusable Error Summary, Error Messages, Error Placement; приняты сводка после submit и связанные inline ошибки.
+- python C:/Users/kliod/.agents/skills/ui-ux-pro-max/scripts/search.py "form state stable keys" --stack react
+- Получены stable IDs, lazy initialization, local useState; принят field.id, рекомендация local useState для формы отклонена согласно контракту единого RHF.
+- Из Quick Reference приняты видимый фокус, label, цели 44 px, базовый шрифт 16 px, отсутствие перекрытия фокуса.
+- Решения проекта и сценарий 360 px описаны в UI_SYSTEM.md; browser preview не выполнен — подключенных браузеров нет.
