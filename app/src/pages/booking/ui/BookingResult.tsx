@@ -12,27 +12,39 @@ export default function BookingResult(props: Props) {
     heading.current?.focus();
   }, []);
   return (
-    <section>
-      <h1 ref={heading} tabIndex={-1}>
-        {props.kind === "success"
-          ? "Тестовый заказ подтвержден"
-          : "Места закончились. Заказ не оформлен"}
-      </h1>
-      {props.kind === "success" ? (
-        <p>Условный номер: {props.reference}</p>
-      ) : (
-        <p>
-          Данные сохранены. Повторная проверка не гарантирует появление мест.
+    <section className={`result-screen result-${props.kind}`}>
+      <div className="result-banner">
+        <p className="eyebrow">
+          {props.kind === "success"
+            ? "Демонстрационный результат"
+            : "Подтверждение недоступно"}
         </p>
-      )}
-      <BookingSummary booking={props.booking} />
-      <p>Контактный email: {props.booking.email}</p>
+        <h1 ref={heading} tabIndex={-1}>
+          {props.kind === "success"
+            ? "Тестовый заказ подтвержден"
+            : "Места закончились. Заказ не оформлен"}
+        </h1>
+        {props.kind === "success" ? (
+          <p>Условный номер: {props.reference}</p>
+        ) : (
+          <p>
+            Данные сохранены. Повторная проверка не гарантирует появление мест.
+          </p>
+        )}
+      </div>
+      <div className="review-card">
+        <BookingSummary booking={props.booking} />
+        <p className="contact-value">
+          <span className="muted">Контактный email</span>
+          <strong>{props.booking.email}</strong>
+        </p>
+      </div>
       {props.kind === "soldOut" && (
         <div className="actions">
           <button type="button" onClick={props.onEdit}>
             Изменить данные
           </button>
-          <button type="button" onClick={props.onRetry}>
+          <button className="primary" type="button" onClick={props.onRetry}>
             Повторить проверку
           </button>
         </div>

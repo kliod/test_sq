@@ -30,47 +30,58 @@ export default function BookingForm({
         >
           Участники
         </h2>
-        <p id="group-help">
+        <p id="group-help" className="muted">
           Если есть ребенок младше 14 лет, добавьте участника от 18 лет.
         </p>
         {fields.map((field, index) => {
           const nameError = errors.participants?.[index]?.name?.message;
           const ageError = errors.participants?.[index]?.age?.message;
           return (
-            <fieldset key={field.id} aria-describedby="group-help">
+            <fieldset
+              className="participant-card"
+              key={field.id}
+              aria-describedby="group-help"
+            >
               <legend>Участник {index + 1}</legend>
-              <label htmlFor={field.id + "-name"}>Имя</label>
-              <input
-                id={field.id + "-name"}
-                autoComplete="name"
-                {...register(`participants.${index}.name`)}
-                aria-invalid={!!nameError}
-                aria-describedby={
-                  nameError ? field.id + "-name-error" : undefined
-                }
-              />
-              {nameError && (
-                <p id={field.id + "-name-error"} className="error">
-                  {nameError}
-                </p>
-              )}
-              <label htmlFor={field.id + "-age"}>Возраст</label>
-              <input
-                id={field.id + "-age"}
-                type="text"
-                inputMode="numeric"
-                {...register(`participants.${index}.age`)}
-                aria-invalid={!!ageError}
-                aria-describedby={
-                  ageError ? field.id + "-age-error" : undefined
-                }
-              />
-              {ageError && (
-                <p id={field.id + "-age-error"} className="error">
-                  {ageError}
-                </p>
-              )}
+              <div className="participant-fields">
+                <div className="field">
+                  <label htmlFor={field.id + "-name"}>Имя</label>
+                  <input
+                    id={field.id + "-name"}
+                    autoComplete="name"
+                    {...register(`participants.${index}.name`)}
+                    aria-invalid={!!nameError}
+                    aria-describedby={
+                      nameError ? field.id + "-name-error" : undefined
+                    }
+                  />
+                  {nameError && (
+                    <p id={field.id + "-name-error"} className="error">
+                      {nameError}
+                    </p>
+                  )}
+                </div>
+                <div className="field">
+                  <label htmlFor={field.id + "-age"}>Возраст</label>
+                  <input
+                    id={field.id + "-age"}
+                    type="text"
+                    inputMode="numeric"
+                    {...register(`participants.${index}.age`)}
+                    aria-invalid={!!ageError}
+                    aria-describedby={
+                      ageError ? field.id + "-age-error" : undefined
+                    }
+                  />
+                  {ageError && (
+                    <p id={field.id + "-age-error"} className="error">
+                      {ageError}
+                    </p>
+                  )}
+                </div>
+              </div>
               <button
+                className="text-button"
                 type="button"
                 disabled={fields.length <= MIN_PARTICIPANTS}
                 aria-describedby={
@@ -84,17 +95,19 @@ export default function BookingForm({
           );
         })}
         {fields.length === MIN_PARTICIPANTS && (
-          <p id="minimum-help">Нужен хотя бы один участник.</p>
+          <p className="field-help" id="minimum-help">
+            Нужен хотя бы один участник.
+          </p>
         )}
         {errors.root?.group?.message && (
-          <p id="group-error" className="error">
+          <p id="group-error" className="error notice">
             {errors.root.group.message}
           </p>
         )}
         {errors.root?.form?.message && (
-          <p className="error">{errors.root.form.message}</p>
+          <p className="error notice">{errors.root.form.message}</p>
         )}
-        <p role="status">
+        <p className="participant-count" role="status" aria-atomic="true">
           Участники: {fields.length} из {MAX_PARTICIPANTS}
         </p>
         <button
@@ -108,10 +121,12 @@ export default function BookingForm({
           Добавить участника
         </button>
         {fields.length >= MAX_PARTICIPANTS && (
-          <p id="maximum-help">Максимум 4 участника.</p>
+          <p className="field-help" id="maximum-help">
+            Максимум 4 участника.
+          </p>
         )}
       </section>
-      <section aria-labelledby="contact-heading">
+      <section className="contact-card" aria-labelledby="contact-heading">
         <h2 id="contact-heading">Контакт</h2>
         <label htmlFor="email">Email для всего заказа</label>
         <input

@@ -27,14 +27,27 @@ export default function BookingReview({
     else if (error) errorMessage.current?.focus();
   }, [pending, error]);
   return (
-    <section aria-busy={pending}>
+    <section className="review-screen" aria-busy={pending}>
       <h1 ref={heading} tabIndex={-1}>
         Проверьте заказ
       </h1>
-      <BookingSummary booking={booking} />
-      <p>Контактный email: {booking.email}</p>
+      <p className="screen-intro">
+        Проверьте участников, тарифы и общий email перед подтверждением.
+      </p>
+      <div className="review-card">
+        <BookingSummary booking={booking} />
+        <p className="contact-value">
+          <span className="muted">Контактный email</span>
+          <strong>{booking.email}</strong>
+        </p>
+      </div>
       {error && (
-        <p ref={errorMessage} tabIndex={-1} role="alert" className="error">
+        <p
+          ref={errorMessage}
+          tabIndex={-1}
+          role="alert"
+          className="error notice"
+        >
           {error}
         </p>
       )}
@@ -48,12 +61,12 @@ export default function BookingReview({
           <button type="button" disabled={pending} onClick={onEdit}>
             Изменить
           </button>
-          <button type="submit" disabled={pending}>
+          <button className="primary" type="submit" disabled={pending}>
             {pending ? "Подтверждаем…" : "Подтвердить заказ"}
           </button>
         </div>
       </form>
-      <p ref={status} tabIndex={-1} role="status">
+      <p className="pending-status" ref={status} tabIndex={-1} role="status">
         {pending ? "Подтверждаем демонстрационный заказ." : ""}
       </p>
     </section>
