@@ -1,2 +1,47 @@
-﻿* { box-sizing: border-box; }
-body { margin: 0; }
+﻿* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+}
+main {
+  max-width: 1040px;
+  margin: auto;
+  padding: 24px 16px;
+  overflow-wrap: anywhere;
+}
+section,
+fieldset {
+  margin: 16px 0;
+  min-width: 0;
+}
+fieldset {
+  padding: 16px;
+}
+label {
+  display: block;
+  margin-top: 12px;
+}
+input {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  min-height: 44px;
+  font: inherit;
+  padding: 8px;
+}
+button {
+  min-height: 44px;
+  font: inherit;
+  margin: 8px 8px 8px 0;
+  padding: 8px 12px;
+}
+.error {
+  color: #b91c1c;
+}
+:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 3px;
+}
