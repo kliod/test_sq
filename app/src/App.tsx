@@ -1,23 +1,35 @@
-﻿import { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { FormEvent } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import BookingForm from "./booking/BookingForm";
 import BookingSummary from "./booking/BookingSummary";
+import BookingResult from "./booking/BookingResult";
+import { createBookingService } from "./booking/bookingService";
+import type { BookingService } from "./booking/bookingService";
 import BookingReview from "./booking/BookingReview";
 import {
   MAX_PARTICIPANTS,
   MIN_PARTICIPANTS,
   validateAndNormalize,
+  isSameBooking,
 } from "./booking/bookingModel";
 import type { BookingFormValues } from "./booking/bookingModel";
 import {
   editBooking,
+  startConfirmation,
+  confirmationFinished,
+  confirmationFailed,
   reviewBooking,
   selectBookingFlow,
 } from "./booking/bookingSlice";
 import { useAppDispatch, useAppSelector } from "./state/hooks";
 
-export default function App() {
+export default function App({ service }: { service?: BookingService } = {}) {
+  const serviceRef = useRef<BookingService | null>(null);
+  if (!serviceRef.current)
+    serviceRef.current =
+      service ?? createBookingService(window.location.search);
+  const inFlightRef = useRef(false);
   const {
     register,
     control,
@@ -53,8 +65,41 @@ export default function App() {
     }
   }, [fields, setFocus]);
 
+  function returnToEditing() {
+    if (inFlightRef.current) return;
+    dispatch(editBooking());
+  }
+  async function confirmOrder() {
+    if (
+      inFlightRef.current ||
+      (flow.step !== "review" && flow.step !== "soldOut") ||
+      !flow.reviewedBooking
+    )
+      return;
+    const current = validateAndNormalize(getValues());
+    if (!current.ok || !isSameBooking(current.booking, flow.reviewedBooking)) {
+      dispatch(editBooking());
+      setError("root.form", {
+        message: "Данные изменились. Проверьте заказ еще раз.",
+      });
+      return;
+    }
+    inFlightRef.current = true;
+    dispatch(startConfirmation());
+    try {
+      const result = await serviceRef.current!.confirm(flow.reviewedBooking);
+      dispatch(confirmationFinished(result));
+    } catch {
+      dispatch(
+        confirmationFailed("Не удалось проверить заказ. Попробуйте еще раз."),
+      );
+    } finally {
+      inFlightRef.current = false;
+    }
+  }
   function checkOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (inFlightRef.current || flow.step !== "editing") return;
     clearErrors();
     const result = validateAndNormalize(getValues());
     if (result.ok) {
@@ -89,7 +134,12 @@ export default function App() {
     else if (result.errors.email) setFocus("email");
   }
   function addParticipant() {
-    if (fields.length >= MAX_PARTICIPANTS) return;
+    if (
+      inFlightRef.current ||
+      flow.step !== "editing" ||
+      fields.length >= MAX_PARTICIPANTS
+    )
+      return;
     clearErrors();
     append(
       { name: "", age: "" },
@@ -97,7 +147,12 @@ export default function App() {
     );
   }
   function removeParticipant(index: number) {
-    if (fields.length <= MIN_PARTICIPANTS) return;
+    if (
+      inFlightRef.current ||
+      flow.step !== "editing" ||
+      fields.length <= MIN_PARTICIPANTS
+    )
+      return;
     pendingFocus.current = Math.min(index, fields.length - 2);
     remove(index);
     clearErrors();
@@ -105,10 +160,27 @@ export default function App() {
   return (
     <main>
       <p>Вечер открытий — демонстрационное мероприятие</p>
-      {flow.step === "review" && flow.reviewedBooking ? (
+      {flow.step === "success" && flow.reviewedBooking && flow.reference ? (
+        <BookingResult
+          kind="success"
+          booking={flow.reviewedBooking}
+          reference={flow.reference}
+        />
+      ) : flow.step === "soldOut" && flow.reviewedBooking ? (
+        <BookingResult
+          kind="soldOut"
+          booking={flow.reviewedBooking}
+          onEdit={returnToEditing}
+          onRetry={confirmOrder}
+        />
+      ) : (flow.step === "review" || flow.step === "submitting") &&
+        flow.reviewedBooking ? (
         <BookingReview
           booking={flow.reviewedBooking}
-          onEdit={() => dispatch(editBooking())}
+          onEdit={returnToEditing}
+          onConfirm={confirmOrder}
+          pending={flow.step === "submitting"}
+          error={flow.submitError}
         />
       ) : (
         <>
