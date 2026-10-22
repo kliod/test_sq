@@ -12,15 +12,15 @@
 ## Что сделать
 
 1. Проверить, есть ли уже React/Vite-проект в app/. Если его нет, создать минимальный шаблон React+TS в app/, предварительно согласовав с человеком команды скачивания пакетов. Не инициализировать поверх существующих исходников.
-2. Подключить обязательные `@reduxjs/toolkit` и `react-redux`: создать минимальный `configureStore` с начальным состоянием сценария, типизированные hooks и `Provider` в `main.tsx`. Реальные переходы реализуются в TASK 03/04. react-hook-form и vitest допустимы сразу, но не создавать формы. Команды скачивания предварительно согласовать. Никаких UI-библиотек, роутера, Tailwind, Zod без реального применения, Playwright.
-3. Создать `src/App.tsx` с минимальным заголовком Оформление билетов, коротким пояснением, что это демонстрационный интерфейс, и без кнопок, которые притворяются работающими.
+2. Подключить обязательные `@reduxjs/toolkit` и `react-redux`: создать минимальный `configureStore` с начальным состоянием сценария, типизированные hooks и `Provider` в `src/app/providers/AppProviders.tsx`, подключенный из `main.tsx` через `src/app/index.ts`. Reducer импортировать через публичный `src/pages/booking/index.ts`. Реальные переходы реализуются в TASK 03/04. react-hook-form и vitest допустимы сразу, но не создавать формы. Команды скачивания предварительно согласовать. Никаких UI-библиотек, роутера, Tailwind, Zod без реального применения, Playwright.
+3. Создать `src/app/App.tsx` с минимальным заголовком Оформление билетов, коротким пояснением, что это демонстрационный интерфейс, и без кнопок, которые притворяются работающими.
 4. Проверить tsconfig /scripts. В `package.json` обеспечить dev, build, test (например `vitest run` ). Минимальный `styles.css` для сброса базовых отступов допускается, **без стилизации готовых экранов**.
 5. Проверить `npm run build` и запуск dev-сервера. Если доступен браузер, убедиться, что отрисовался заголовок.
 6. До первой правки напомнить человеку включить запись процесса. Без его подтверждения не утверждать, что запись ведется; при отсутствии записи зафиксировать риск поставки. Сам Codex не может удостоверить файл записи без доступа к нему.
 
 ## Разрешенные файлы
 
- `app/package.json`, lockfile, Vite/TS configs, `app/index.html`, `app/src/main.tsx`, `app/src/App.tsx`, `app/src/state/store.ts`, `app/src/state/hooks.ts`, `app/src/booking/bookingSlice.ts` (только начальное состояние), `app/src/styles.css`, прочие файлы стандартного шаблона только по необходимости. Не редактировать docs/spec/, docs/tasks/, `AGENTS.md` и внепроектные файлы.
+ `app/package.json`, lockfile, Vite/TS configs, `app/index.html`, `app/src/main.tsx`, `app/src/app/index.ts`, `app/src/app/App.tsx`, `app/src/app/providers/AppProviders.tsx`, `app/src/app/store/store.ts`, `app/src/app/store/hooks.ts`, `app/src/pages/booking/index.ts`, `app/src/pages/booking/model/bookingSlice.ts` (только начальное состояние), `app/src/app/styles/styles.css`, прочие файлы стандартного шаблона только по необходимости. Не редактировать docs/spec/, docs/tasks/, `AGENTS.md` и внепроектные файлы.
 
 ## Завершение / gate
 

@@ -1,4 +1,4 @@
-﻿import type { Booking } from "./bookingModel";
+﻿import type { Booking } from "../model/bookingModel";
 
 export type ConfirmResult =
   { kind: "success"; reference: string } | { kind: "soldOut" };

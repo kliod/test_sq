@@ -9,6 +9,7 @@
 3. Пользователь позже уточнил порядок выполнения: UI/UX Pro Max применяется на задачах 02 и 05, а рабочий код находится в `app/`. Эти более поздние уточнения зафиксированы в `docs/spec/SKILL_SETUP.md`, `docs/spec/UX_BRIEF.md`, `docs/tasks/` и `docs/change_scope_map.md`. В случае расхождения с исходным планом по этим **процессным** решениям применяются уточнения.
 4. Механика работы Codex, контроль границ, передача результата и проверка по риску определяются корневым `AGENTS.md`, `docs/WORKFLOW.md` и связанными документами `docs/`.
 5. При обнаружении других содержательных противоречий между файлами `docs/spec/` не выбирай наугад. Укажи оба фрагмента, останови конфликтующую правку и запроси решение. Без конфликта продолжай текущую задачу.
+6. При выборе границ модулей и выделении новой ответственности применяй [правила декомпозиции на основе FSD](DECOMPOSITION.md). Код организован в `app/src/app/` и `app/src/pages/booking/`; действующие пути и владельцы определены в `CONTRACTS.md`.
 
 ---
 
@@ -74,24 +75,37 @@
 
 ```text
 src/
-  main.tsx
-  App.tsx                     # RHF, координация и dispatch действий сценария
-  state/
-    store.ts                  # configureStore, RootState, AppDispatch
-    hooks.ts                  # Типизированные useAppDispatch/useAppSelector
-  booking/
-    bookingSlice.ts           # Шаг, снимок, ошибка и результат сценария
-    bookingModel.ts            # Константы, типы, parseAge, validate, price
-    bookingService.ts          # Контракт и реализация mock confirm
-    BookingForm.tsx            # Поля участников, email, добавление/удаление
-    BookingSummary.tsx         # Состав и цена для editing/review
-    BookingResult.tsx          # Success или sold-out
-    bookingModel.test.ts       # Граничные проверки правил
-  styles.css                  # Если выбран обычный CSS
+  main.tsx                    # Тонкий вход через app/index.ts
+  app/
+    index.ts                  # Запуск и подключение глобального CSS
+    App.tsx                   # RHF, координация и dispatch действий сценария
+    providers/AppProviders.tsx # Provider с одним store
+    store/
+      store.ts                # configureStore, фабрика, RootState, AppDispatch
+      hooks.ts                # Типизированные useAppDispatch/useAppSelector
+      selectors.ts            # Корневые селекторы
+      bookingIntegration.test.tsx # Проверки связей через SSR
+    styles/styles.css
+  pages/booking/
+    index.ts                  # Публичный API слайса
+    model/
+      bookingSlice.ts         # Шаг, снимок, ошибка и результат сценария
+      bookingSlice.test.ts
+      bookingModel.ts         # Константы, типы, parseAge, validate, price
+      bookingModel.test.ts
+    api/bookingService.ts     # Контракт и реализация mock confirm
+    ui/
+      BookingPage.tsx         # Представление шага через props
+      BookingForm.tsx         # Поля участников, email, добавление/удаление
+      BookingSummary.tsx      # Состав и цена для editing/review
+      BookingReview.tsx       # Проверка снимка и pending
+      BookingResult.tsx       # Success или sold-out
 README.md
 ```
 
 Допустимо разделить `bookingModel.ts` на файлы `schema.ts` и `pricing.ts`, **только если файл действительно стал неудобным**. Не создавать пустые слои `shared`, `entities`, `widgets`, `api` и т.п. Доменная логика не должна импортировать React.
+
+`App` сохраняет единственную RHF-форму и guard, а `BookingPage` только собирает представление. Импорты снаружи `pages/booking` идут через его явный `index.ts`; обратных импортов store/hooks/`RootState` в слайсе нет. Интеграционные проверки с store принадлежат слою `app`, чистые проверки модели и reducer — слайсу.
 
 ### 4.1. Типы и контракты
 
@@ -317,7 +331,7 @@ const hasRequiredAdult = (people: Participant[]) =>
 ### Task A. Основа + домен
 
 **Вход:** пустой проект, разделы 1-4.  
-**Изменять:** package/config по необходимости, `src/main.tsx`, `src/App.tsx`, `src/state/store.ts`, `src/state/hooks.ts`, начальный `src/booking/bookingSlice.ts`, `src/booking/bookingModel.ts`, `src/booking/bookingModel.test.ts`.
+**Изменять:** package/config по необходимости, `src/main.tsx`, `src/app/index.ts`, `src/app/App.tsx`, `src/app/providers/AppProviders.tsx`, `src/app/store/store.ts`, `src/app/store/hooks.ts`, `src/pages/booking/index.ts`, начальный `src/pages/booking/model/bookingSlice.ts`, `src/pages/booking/model/bookingModel.ts`, `src/pages/booking/model/bookingModel.test.ts`.
 **Выход:** запускаемое SPA и чистые типы/функции/проверки.  
 **Критерий:** тесты M01-M14, `npm run build` без ошибок; если сборка еще использует минимальную заглушку интерфейса, объявить это явно.
 
@@ -326,7 +340,7 @@ const hasRequiredAdult = (people: Participant[]) =>
 ### Task B. Сквозной путь до review
 
 **Вход:** типы и валидатор из Task A.  
-**Изменять:** `src/App.tsx`, `src/booking/bookingSlice.ts` и его тесты, `src/booking/BookingForm.tsx`, `src/booking/BookingSummary.tsx`, выбранный файл стилей.
+**Изменять:** `src/app/App.tsx`, `src/app/store/selectors.ts`, `src/app/store/bookingIntegration.test.tsx`, `src/pages/booking/index.ts`, `src/pages/booking/model/bookingSlice.ts` и его тесты, `src/pages/booking/ui/{BookingPage,BookingForm,BookingSummary,BookingReview}.tsx`, выбранный файл стилей.
 **Выход:** полноценная форма 1-4 участников, динамические поля, email, реактивная цена и валидированный review с возвращением к редактированию.  
 **Критерий:** U01/U02, контроль итогов 13/14/17/18, рабочая раскладка 360 px. Не создавать второй редактируемый `draft` вне RHF.
 
@@ -335,7 +349,7 @@ const hasRequiredAdult = (people: Participant[]) =>
 ### Task C. Подтверждение и результаты
 
 **Вход:** review и валидированный снимок из Task B.  
-**Изменять:** `src/App.tsx`, `src/booking/bookingSlice.ts` и его тесты, `src/booking/bookingService.ts`, `src/booking/BookingResult.tsx`, существующие тесты в минимальном объеме.
+**Изменять:** `src/app/App.tsx`, `src/app/store/bookingIntegration.test.tsx`, `src/pages/booking/index.ts`, `src/pages/booking/model/bookingSlice.ts` и его тесты, `src/pages/booking/api/bookingService.ts`, `src/pages/booking/ui/{BookingPage,BookingReview,BookingResult}.tsx`, существующие тесты в минимальном объеме.
 **Выход:** типизированный mock, pending, success/sold-out, guard от дублей, восстановление после отказа и reject.  
 **Критерий:** U03-U10, особенно отсутствие двойного `confirm` и воспроизводимость `?scenario=sold-out`.
 

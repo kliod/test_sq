@@ -3,8 +3,8 @@ import type {
   FieldErrors,
   UseFormRegister,
 } from "react-hook-form";
-import { MAX_PARTICIPANTS, MIN_PARTICIPANTS } from "./bookingModel";
-import type { BookingFormValues } from "./bookingModel";
+import { MAX_PARTICIPANTS, MIN_PARTICIPANTS } from "../model/bookingModel";
+import type { BookingFormValues } from "../model/bookingModel";
 
 type Props = {
   fields: FieldArrayWithId<BookingFormValues, "participants">[];

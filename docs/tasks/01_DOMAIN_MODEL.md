@@ -11,7 +11,7 @@
 
 ## Реализация
 
-1. Описать в `app/src/booking/bookingModel.ts` экспортируемые типы ParticipantFields, BookingFormValues, Participant, Booking, ValidationErrors, ValidationResult. Только TypeScript, без React и browser API.
+1. Описать в `app/src/pages/booking/model/bookingModel.ts` экспортируемые типы ParticipantFields, BookingFormValues, Participant, Booking, ValidationErrors, ValidationResult. Только TypeScript, без React и browser API.
 2. Определить константы MIN_PARTICIPANTS=1, MAX_PARTICIPANTS=4, FULL_TICKET_MIN_AGE=14, ADULT_MIN_AGE=18, CHILD_PRICE=1000, FULL_PRICE=2000. Все правила должны использовать эти константы, а не повторяющиеся магические числа.
 3. Реализовать parseAge(raw: string): number | null: после trim только ^[0-9]+$, затем safe integer и >=0. Не ограничивать возраст придуманным верхним порогом. Не допускать экспоненту, дроби, текст, минус и пустую строку.
 4. Реализовать getTicketPrice, calculateTotal, hasRequiredAdult, validateAndNormalize, isSameBooking. calculateTotal принимает нормализованных участников, а не строки формы. isSameBooking сверяет email, длину, порядок, имена и возраста; простая явная реализация достаточна.
@@ -21,7 +21,7 @@
 
 ## Границы изменения
 
-Только `app/src/booking/bookingModel.ts`, `app/src/booking/bookingModel.test.ts`, минимальные исправления `app/package.json` для тестового runner, если они действительно нужны. Не писать JSX, состояние React, BookingService, CSS или документацию дизайна.
+Только `app/src/pages/booking/model/bookingModel.ts`, `app/src/pages/booking/model/bookingModel.test.ts`, минимально явные экспорты для текущих потребителей в `app/src/pages/booking/index.ts`, минимальные исправления `app/package.json` для тестового runner, если они действительно нужны. Не писать JSX, состояние React, BookingService, CSS или документацию дизайна.
 
 ## Gate
 

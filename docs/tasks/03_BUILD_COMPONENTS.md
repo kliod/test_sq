@@ -7,14 +7,16 @@
 
 ## Контекст и входные контракты
 
-Прочитай `app/src/booking/bookingModel.ts`, `app/docs/UI_SYSTEM.md`, `docs/spec/CONTRACTS.md`, `docs/spec/ACCEPTANCE.md`, отчеты TASK 01-02. Внешние рекомендации скилла уже отфильтрованы в UI_SYSTEM.md и не должны менять бизнес-логику.
+Прочитай `app/src/pages/booking/model/bookingModel.ts`, `app/docs/UI_SYSTEM.md`, `docs/spec/CONTRACTS.md`, `docs/spec/ACCEPTANCE.md`, отчеты TASK 01-02. Внешние рекомендации скилла уже отфильтрованы в UI_SYSTEM.md и не должны менять бизнес-логику.
 
 ## Компоненты и ответственность
 
-1. `app/src/App.tsx`: единственный useForm<BookingFormValues> с shouldUnregister:false; useFieldArray для participants на постоянно смонтированном уровне. Шаги editing / review и **только нормализованный** reviewedBooking хранить в `bookingSlice.ts` (Redux Toolkit); читать через типизированные селекторы, переходить через actions. Не заводить второй mutable draft или локальную копию состояния сценария.
-2. `app/src/booking/BookingForm.tsx`: поля имени и возраста для 1-4 участников, общий email, добавление/удаление; все type="button" для вспомогательных кнопок. Ключи карточек по field.id, не по индексу. Внешний массив RHF индексируется для register, но React key стабилен.
-3. `app/src/booking/BookingSummary.tsx`: вычисляемая сводка из наблюдаемых значений editing **или** из нормализованного Booking на review. Не хранить сумму в useState; не считать пустой возраст нулем; не выдавать частичную сумму за итог. Если все возраста корректны, показывать тарифы и сумму, даже если правило сопровождения еще нарушено.
-4. `app/src/booking/BookingReview.tsx`: **только чтение** снимка reviewedBooking с email, именами, возрастами, категориями и ценами, Изменить возвращает в editing без сброса полей. Кнопку confirm пока держать явно отключенной/неактивной с сообщением о незавершенном шаге TASK 04, а не симулировать успех.
+1. `app/src/app/App.tsx`: единственный useForm<BookingFormValues> с shouldUnregister:false; useFieldArray для participants на постоянно смонтированном уровне. Шаги editing / review и **только нормализованный** reviewedBooking хранить в `bookingSlice.ts` (Redux Toolkit); читать через типизированные селекторы, переходить через actions. Не заводить второй mutable draft или локальную копию состояния сценария.
+2. `app/src/pages/booking/ui/BookingForm.tsx`: поля имени и возраста для 1-4 участников, общий email, добавление/удаление; все type="button" для вспомогательных кнопок. Ключи карточек по field.id, не по индексу. Внешний массив RHF индексируется для register, но React key стабилен.
+3. `app/src/pages/booking/ui/BookingSummary.tsx`: вычисляемая сводка из наблюдаемых значений editing **или** из нормализованного Booking на review. Не хранить сумму в useState; не считать пустой возраст нулем; не выдавать частичную сумму за итог. Если все возраста корректны, показывать тарифы и сумму, даже если правило сопровождения еще нарушено.
+4. `app/src/pages/booking/ui/BookingReview.tsx`: **только чтение** снимка reviewedBooking с email, именами, возрастами, категориями и ценами, Изменить возвращает в editing без сброса полей. Кнопку confirm пока держать явно отключенной/неактивной с сообщением о незавершенном шаге TASK 04, а не симулировать успех.
+
+`app/src/pages/booking/ui/BookingPage.tsx` собирает представление текущего шага из props. `App` использует typed hooks и корневой селектор из `app/src/app/store/selectors.ts`; форма и guard остаются в `App`. Внешние импорты сценария идут через `app/src/pages/booking/index.ts`, слайс не импортирует `app` даже ради `RootState` или тестов.
 
 ## Поведение и ошибки
 
@@ -29,7 +31,9 @@
 
 ## Границы изменения
 
- `app/src/App.tsx`, `app/src/booking/bookingSlice.ts`, `app/src/booking/bookingSlice.test.ts`, `app/src/state/store.ts`, `app/src/state/hooks.ts`, `app/src/booking/BookingForm.tsx`, `app/src/booking/BookingSummary.tsx`, `app/src/booking/BookingReview.tsx`, минимально `app/src/styles.css` **только** для возможности пользоваться каркасом. bookingModel.ts читать, но не переписывать. Не создавать сервис, результат заказа, тему, дизайн-систему, дополнительные библиотеки.
+ `app/src/app/App.tsx`, `app/src/pages/booking/model/bookingSlice.ts`, `app/src/pages/booking/model/bookingSlice.test.ts`, `app/src/app/store/store.ts`, `app/src/app/store/hooks.ts`, `app/src/pages/booking/ui/BookingForm.tsx`, `app/src/pages/booking/ui/BookingSummary.tsx`, `app/src/pages/booking/ui/BookingReview.tsx`, минимально `app/src/app/styles/styles.css` **только** для возможности пользоваться каркасом. bookingModel.ts читать, но не переписывать. Не создавать сервис, результат заказа, тему, дизайн-систему, дополнительные библиотеки.
+
+Для сборки и проверки границ также разрешены `app/src/pages/booking/ui/BookingPage.tsx`, `app/src/pages/booking/index.ts`, `app/src/app/store/selectors.ts`, `app/src/app/store/bookingIntegration.test.tsx`. Проверки reducer остаются в слайсе; проверки с Provider/store — в `app`.
 
 ## Проверки и gate
 

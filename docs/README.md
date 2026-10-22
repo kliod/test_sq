@@ -6,6 +6,7 @@
 
 1. [Рабочий процесс](WORKFLOW.md) — приоритет источников, границы изменений, проверки и передача результата.
 2. [Спецификация](spec/SPEC.md), [требования](spec/REQUIREMENTS.md), [контракты](spec/CONTRACTS.md).
+   Правила организации кода: [декомпозиция на основе FSD](spec/DECOMPOSITION.md).
 3. [Карта разрешенных изменений](change_scope_map.md), текущая [задача](tasks/) и последний handoff в kaeru.
 4. По предмету изменения: [приемка](spec/ACCEPTANCE.md), [проверки](testing.md), [архитектурные ограничения](architecture_contracts.md).
 5. Для UI-этапов 02/05: [UX](spec/UX_BRIEF.md), [применение скилла](spec/SKILL_SETUP.md) и реально установленный SKILL.md.

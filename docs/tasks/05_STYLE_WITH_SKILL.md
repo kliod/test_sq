@@ -13,7 +13,7 @@
 
 ## Стилизация
 
-- Привести `app/src/styles.css` к конкретным токенам из `app/docs/UI_SYSTEM.md`: основные цвета, фон, тексты, границы, шрифты, отступы, тени, радиусы, интерактивные состояния.
+- Привести `app/src/app/styles/styles.css` к конкретным токенам из `app/docs/UI_SYSTEM.md`: основные цвета, фон, тексты, границы, шрифты, отступы, тени, радиусы, интерактивные состояния.
 - Desktop: максимальная ширина 960-1100 px и понятная двухколоночная иерархия формы и сводки. Не разрывать смысловой порядок Tab ради сетки.
 - 360 px: одна колонка, поля по ширине контента, около 16 px горизонтальных отступов, сводка перед CTA, без sticky-панелей, перекрывающих клавиатуру. Предусмотреть min-width: 0 у вложенных grid/flex блоков, длинные email/имена, внутренние отступы.
 - Компоненты: поле имени, возраст, блок участника и удаление, Добавить, тарифные подсказки, сводка, review, pending, success, sold-out, error/retry. У всех состояний одна система отступов и типографики.
@@ -23,7 +23,7 @@
 
 ## Границы изменений
 
-Можно менять **только** `app/src/styles.css`, JSX-разметку/классы в BookingForm.tsx, BookingSummary.tsx, BookingReview.tsx, BookingResult.tsx, App.tsx в пределах презентационного слоя, `app/docs/SKILL_USAGE.md` и уточнение `app/docs/UI_SYSTEM.md`. Запрещено менять тарифы, парсер возраста, валидацию, сервис, типы, state transitions или тесты ради CSS. Не подключать Tailwind, shadcn, Radix, Google Fonts, икон-пакеты без согласования.
+Можно менять **только** `app/src/app/styles/styles.css`, JSX-разметку/классы в `app/src/pages/booking/ui/{BookingPage,BookingForm,BookingSummary,BookingReview,BookingResult}.tsx` в пределах презентационного слоя, `app/docs/SKILL_USAGE.md` и уточнение `app/docs/UI_SYSTEM.md`. Координация в `app/src/app/App.tsx` остается вне стилизации. Запрещено менять тарифы, парсер возраста, валидацию, сервис, типы, state transitions или тесты ради CSS. Не подключать Tailwind, shadcn, Radix, Google Fonts, икон-пакеты без согласования.
 
 ## Контроль качества
 

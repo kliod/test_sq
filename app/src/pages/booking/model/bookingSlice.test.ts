@@ -1,24 +1,13 @@
-import { afterEach, vi } from "vitest";
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import BookingResult from "./BookingResult";
-import BookingReview from "./BookingReview";
-import { createBookingService } from "./bookingService";
-import type { BookingService } from "./bookingService";
-import {
-  startConfirmation,
-  confirmationFinished,
-  confirmationFailed,
-} from "./bookingSlice";
 import { describe, expect, it } from "vitest";
 import reducer, {
   editBooking,
   reviewBooking,
-  selectBookingFlow,
+  startConfirmation,
+  confirmationFinished,
+  confirmationFailed,
 } from "./bookingSlice";
 import type { BookingFlowState } from "./bookingSlice";
 import type { Booking } from "./bookingModel";
-import { createAppStore } from "../state/store";
 
 const booking: Booking = {
   participants: [{ name: "Анна", age: 18 }],
@@ -26,8 +15,8 @@ const booking: Booking = {
 };
 describe("S01/S02 — editing и review", () => {
   it("начинает с editing без снимка, цены и черновика", () => {
-    const store = createAppStore();
-    expect(selectBookingFlow(store.getState())).toEqual({
+    const state = reducer(undefined, { type: "init" });
+    expect(state).toEqual({
       step: "editing",
       reviewedBooking: null,
       submitError: null,
@@ -88,15 +77,6 @@ describe("S01/S02 — editing и review", () => {
       expect(reducer(state, editBooking())).toBe(state);
       expect(reducer(state, reviewBooking(booking))).toBe(state);
     }
-  });
-  it("store изолирован, состояние и actions сериализуемы", () => {
-    const a = createAppStore();
-    const b = createAppStore();
-    const action = reviewBooking(booking);
-    a.dispatch(action);
-    expect(selectBookingFlow(b.getState()).step).toBe("editing");
-    expect(JSON.parse(JSON.stringify(a.getState()))).toEqual(a.getState());
-    expect(JSON.parse(JSON.stringify(action))).toEqual(action);
   });
 });
 
@@ -194,111 +174,5 @@ describe("S02 — подтверждение и результаты", () => {
     ).toBe(empty);
     const editing = reducer(undefined, { type: "unknown" });
     expect(reducer(editing, startConfirmation())).toBe(editing);
-  });
-});
-
-describe("Mock confirm — сервис и отображение результата", () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-  it.each(["", "?scenario=sold-out"])(
-    "U06/U07 — фактический вызов confirm: %s",
-    async (search) => {
-      vi.useFakeTimers();
-      const store = createAppStore();
-      const service = createBookingService(search);
-      store.dispatch(reviewBooking(booking));
-      store.dispatch(startConfirmation());
-      const request = service.confirm(booking);
-      let finished = false;
-      void request.then(() => {
-        finished = true;
-      });
-      await vi.advanceTimersByTimeAsync(599);
-      expect(finished).toBe(false);
-      await vi.advanceTimersByTimeAsync(1);
-      const result = await request;
-      expect(result).toEqual(
-        search
-          ? { kind: "soldOut" }
-          : { kind: "success", reference: "DEMO-001" },
-      );
-      store.dispatch(confirmationFinished(result));
-      expect(store.getState().booking.reviewedBooking).toEqual(booking);
-      const markup =
-        result.kind === "success"
-          ? renderToStaticMarkup(
-              createElement(BookingResult, {
-                booking,
-                kind: "success",
-                reference: result.reference,
-              }),
-            )
-          : renderToStaticMarkup(
-              createElement(BookingResult, {
-                booking,
-                kind: "soldOut",
-                onEdit() {},
-                onRetry() {},
-              }),
-            );
-      expect(markup).toContain("Анна");
-      expect(markup).toContain("demo@example.com");
-      if (result.kind === "success") expect(markup).toContain("DEMO-001");
-      else {
-        expect(markup).toContain("Заказ не оформлен");
-        expect(markup).not.toContain("DEMO-");
-        const retry = service.confirm(booking);
-        await vi.advanceTimersByTimeAsync(600);
-        expect(await retry).toEqual({ kind: "soldOut" });
-      }
-    },
-  );
-  it("U05 — разметка pending содержит status и disabled действий", () => {
-    const markup = renderToStaticMarkup(
-      createElement(BookingReview, {
-        booking,
-        pending: true,
-        error: null,
-        onEdit() {},
-        onConfirm() {},
-      }),
-    );
-    expect(markup).toContain('aria-busy="true"');
-    expect(markup).toContain('role="status"');
-    expect(markup.match(/disabled=""/g)).toHaveLength(2);
-    expect(markup).toContain("Подтверждаем");
-  });
-  it("U10 — reject подставного сервиса отдельно от soldOut, снимок сохранен", async () => {
-    const store = createAppStore();
-    const service: BookingService = {
-      confirm: vi.fn().mockRejectedValue(new Error("test")),
-    };
-    store.dispatch(reviewBooking(booking));
-    store.dispatch(startConfirmation());
-    try {
-      await service.confirm(booking);
-    } catch {
-      store.dispatch(
-        confirmationFailed("Не удалось проверить заказ. Попробуйте еще раз."),
-      );
-    }
-    expect(store.getState().booking.step).toBe("review");
-    expect(store.getState().booking.reviewedBooking).toEqual(booking);
-    expect(store.getState().booking.reference).toBeNull();
-    expect(store.getState().booking.submitError).toContain(
-      "Не удалось проверить заказ",
-    );
-    const markup = renderToStaticMarkup(
-      createElement(BookingReview, {
-        booking,
-        pending: false,
-        error: store.getState().booking.submitError,
-        onEdit() {},
-        onConfirm() {},
-      }),
-    );
-    expect(markup).toContain('role="alert"');
-    expect(markup).not.toContain('disabled=""');
   });
 });

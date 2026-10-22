@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef } from "react";
-import type { Booking } from "./bookingModel";
+import type { Booking } from "../model/bookingModel";
 import BookingSummary from "./BookingSummary";
 
 type Props = {

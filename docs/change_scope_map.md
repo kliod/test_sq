@@ -4,29 +4,29 @@
 
 | Задача | Основной модуль | Разрешенные изменения | Только читать | Проверка по риску |
 |---|---|---|---|---|
-| 00 | Bootstrap | `app/package.json`, lockfile, конфигурация Vite/TS, `app/index.html`, `app/src/main.tsx`, `app/src/App.tsx`, стартовый CSS, файлы стандартного шаблона | `docs/spec/**`, `docs/tasks/**` | `npm run build`, запуск dev при доступности |
-| 01 | Domain | `app/src/booking/bookingModel.ts`, `bookingModel.test.ts`, минимальный `app/package.json` | `docs/spec/**`, UI | `npm run test -- bookingModel` (или фактическая команда runner), сборка при изменении типов/entrypoints |
+| 00 | Bootstrap | `app/package.json`, lockfile, конфигурация Vite/TS, `app/index.html`, `app/src/main.tsx`, `app/src/app/App.tsx`, стартовый CSS, файлы стандартного шаблона | `docs/spec/**`, `docs/tasks/**` | `npm run build`, запуск dev при доступности |
+| 01 | Domain | `app/src/pages/booking/model/bookingModel.ts`, `bookingModel.test.ts`, минимальный `app/package.json` | `docs/spec/**`, UI | `npm run test -- bookingModel` (или фактическая команда runner), сборка при изменении типов/entrypoints |
 | 02 | Design research | `app/docs/UI_SYSTEM.md`, `app/docs/SKILL_USAGE.md` | `docs/spec/**`, код, локальный `SKILL.md` | Проверка полноты документа; кодовые тесты не нужны, если не менялся код |
-| 03 | UI editing/review | `app/src/App.tsx`, `app/src/booking/BookingForm.tsx`, `BookingSummary.tsx`, `BookingReview.tsx`, минимально `app/src/styles.css` | Domain, сервис, `docs/spec/**` | Целевой UI smoke (если доступен), typecheck/build при TS-правках; доменный unit только если затронут контракт |
-| 04 | Booking orchestration | `app/src/App.tsx`, `app/src/booking/bookingService.ts`, `BookingResult.tsx`, `BookingReview.tsx`, минимально `BookingSummary.tsx`/`styles.css` | Domain, `docs/spec/**` | Интеграционные U03/U04 при наличии тестовой среды; узкий smoke success/sold-out; сборка TS |
-| 05 | Styling | `app/src/styles.css`, презентационные JSX/classes в `App.tsx` и четырех booking-компонентах, `app/docs/{UI_SYSTEM,SKILL_USAGE}.md` | Domain, сервис, контракты | Визуальная проверка desktop/360 px, keyboard; сборка при JSX-правках, релевантный UI smoke |
+| 03 | UI editing/review | `app/src/app/App.tsx`, `app/src/pages/booking/ui/{BookingPage,BookingForm,BookingSummary,BookingReview}.tsx`, минимально `app/src/app/styles/styles.css` | Domain, сервис, `docs/spec/**` | Целевой UI smoke (если доступен), typecheck/build при TS-правках; доменный unit только если затронут контракт |
+| 04 | Booking orchestration | `app/src/app/App.tsx`, `app/src/pages/booking/api/bookingService.ts`, `BookingResult.tsx`, `BookingReview.tsx`, минимально `BookingSummary.tsx`/`styles.css` | Domain, `docs/spec/**` | Интеграционные U03/U04 при наличии тестовой среды; узкий smoke success/sold-out; сборка TS |
+| 05 | Styling | `app/src/app/styles/styles.css`, презентационные JSX/classes в `app/src/pages/booking/ui/`, `app/docs/{UI_SYSTEM,SKILL_USAGE}.md` | Domain, сервис, контракты | Визуальная проверка desktop/360 px, keyboard; сборка при JSX-правках, релевантный UI smoke |
 | 06 | QA/delivery | `app/README.md`, тесты, точечные исправления **подтвержденных** дефектов в модуле-владельце | Весь `app/`, `docs/spec/**` | Полная доменная матрица, build, сквозные сценарии, контроль README и материалов сдачи |
 
 Если в задаче перечислены пути из нескольких строк карты, текущая задача **уже разрешает** такое пересечение; повторного разрешения на эти пути не нужно. Любое **новое** пересечение, изменение `docs/spec/`, внешняя установка или исходники за пределами `app/` требуют отдельного согласования.
 
 Обязательные пути Redux Toolkit дополняют строки карты:
 
-- 00: `app/src/state/store.ts`, `app/src/state/hooks.ts`, `app/src/booking/bookingSlice.ts` (начальное состояние), Provider в `app/src/main.tsx`, пакеты `@reduxjs/toolkit` и `react-redux` в package/lockfile после согласования команды установки.
-- 03: те же store/hooks и `app/src/booking/bookingSlice.ts`, `bookingSlice.test.ts` — переходы editing/review, селекторы и S01/S02.
-- 04: slice и его тесты, минимально store/hooks — submitting, результаты, ошибка и запрещенные переходы, S02/S03.
+- 00: `app/src/app/store/store.ts`, `app/src/app/store/hooks.ts`, `app/src/pages/booking/model/bookingSlice.ts` (начальное состояние), `app/src/app/index.ts`, `app/src/pages/booking/index.ts`, Provider в `app/src/app/providers/AppProviders.tsx` с подключением из `app/src/main.tsx`, пакеты `@reduxjs/toolkit` и `react-redux` в package/lockfile после согласования команды установки.
+- 03: те же store/hooks, `app/src/app/store/selectors.ts`, `app/src/pages/booking/model/bookingSlice.ts`, `bookingSlice.test.ts`, минимально `app/src/pages/booking/index.ts` — переходы editing/review, селекторы и S01/S02. Связи с Provider/store проверяются в `app/src/app/store/bookingIntegration.test.tsx`, без обратных импортов в тестах слайса.
+- 04: slice и его тесты, `app/src/pages/booking/ui/BookingPage.tsx`, минимально store/hooks/selectors и `app/src/pages/booking/index.ts`, `app/src/app/store/bookingIntegration.test.tsx` — submitting, результаты, ошибка и запрещенные переходы, S02/S03.
 - 06: финальная проверка S01-S03 вместе с доменной матрицей и пользовательскими сценариями.
 
 ## Источники истины
 
 - Обязательные продуктовые правила: `docs/spec/REQUIREMENTS.md`.
-- Контракты приложения: `docs/spec/CONTRACTS.md`; реализация модели: `app/src/booking/bookingModel.ts` после задачи 01.
+- Контракты приложения: `docs/spec/CONTRACTS.md`; реализация модели: `app/src/pages/booking/model/bookingModel.ts` после задачи 01.
 - Нормализованный заказ/проверка: `bookingModel.ts`; форма: один `useForm` в `App.tsx`; UI не создает альтернативных бизнес-правил.
-- Состояние сценария: `bookingSlice.ts`; настройка store и типизированные hooks: `state/store.ts` и `state/hooks.ts`. Редактируемая форма и вычисляемые цены в store не копируются.
+- Состояние сценария: `pages/booking/model/bookingSlice.ts`; настройка store, hooks и корневые селекторы: `app/store/` (пути от `app/src/`). `App` связывает сценарий с `BookingPage` через props; импорты снаружи слайса идут через `pages/booking/index.ts`. Редактируемая форма и вычисляемые цены в store не копируются.
 - Реакции mock-сервиса: `bookingService.ts`; отображение: компоненты; стили: `styles.css` по `app/docs/UI_SYSTEM.md`.
 - Приемка: `docs/spec/ACCEPTANCE.md`. Описание теста не доказывает прохождение теста.
 

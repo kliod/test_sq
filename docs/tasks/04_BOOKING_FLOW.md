@@ -7,11 +7,11 @@
 
 ## Контекст
 
-Прочитай `docs/spec/CONTRACTS.md`, `docs/spec/ACCEPTANCE.md`, текущую реализацию `app/src/App.tsx` и bookingModel.ts, отчет TASK 03. UX уже определен, но окончательная CSS-полировка выполняется в TASK 05.
+Прочитай `docs/spec/CONTRACTS.md`, `docs/spec/ACCEPTANCE.md`, текущую реализацию `app/src/app/App.tsx` и bookingModel.ts, отчет TASK 03. UX уже определен, но окончательная CSS-полировка выполняется в TASK 05.
 
 ## Обязательное поведение
 
-1. В `app/src/booking/bookingService.ts` определить и реализовать BookingService.confirm(booking): Promise<ConfirmResult>. Режим считать один раз при инициализации: без query -> success, ?scenario=sold-out -> soldOut. Время задержки короткое и воспроизводимое; без случайных отказов.
+1. В `app/src/pages/booking/api/bookingService.ts` определить и реализовать BookingService.confirm(booking): Promise<ConfirmResult>. Режим считать один раз при инициализации: без query -> success, ?scenario=sold-out -> soldOut. Время задержки короткое и воспроизводимое; без случайных отказов.
 2. Обеспечить пять логических состояний: editing | review | submitting | success | soldOut. submitting может визуально пользоваться экраном review; результат может быть одним общим компонентом.
 3. Перед confirm **повторно** запустить validateAndNormalize(getValues()) и сравнить новый нормализованный объект с видимым reviewedBooking через isSameBooking. Если невалидно/отличается, ничего не отправлять; вернуться к редактированию с сообщением, что требуется повторная проверка.
 4. До вызова Promise установить inFlightRef.current = true **синхронно**, после завершения или ошибки снять флаг в finally. Блокировка disabled на UI не заменяет guard. Во время submitting нельзя нажать Изменить, удалить участника или отправить еще один запрос.
@@ -25,9 +25,13 @@
 
  Redux Toolkit `bookingSlice.ts` владеет шагом, snapshot, строкой технической ошибки и reference успешного заказа. App.tsx читает селекторы, валидирует RHF, синхронно выставляет локальный inFlightRef, dispatch начала попытки, вызывает сервис вне reducer и dispatch результата/ошибки; guard снимает в finally. Reducer допускает только переходы из CONTRACTS.md. BookingService не знает о React или Redux. BookingResult.tsx отвечает только за представление. Цены не копируются в стейт и вычисляются из snapshot. Promise, Error, refs и сервис не помещаются в store/actions.
 
+`BookingPage.tsx` собирает review, pending и result из переданных `App` данных и обработчиков. Он не создает форму, store или guard и не вызывает сервис. Корневой селектор находится в `app/src/app/store/selectors.ts`; внешние импорты booking идут через `app/src/pages/booking/index.ts`.
+
 ## Разрешенные файлы
 
- `app/src/App.tsx`, `app/src/booking/bookingSlice.ts`, `app/src/booking/bookingSlice.test.ts`, минимально `app/src/state/store.ts` / `hooks.ts`, `app/src/booking/bookingService.ts`, `app/src/booking/BookingResult.tsx`, `app/src/booking/BookingReview.tsx`, минимально BookingSummary.tsx / `styles.css` для вывода состояний. Модель **не менять** без реального дефекта, документировать любое расширение ее API. Redux Toolkit обязателен. Не подключать backend, router, Zustand, React Query или RTK Query.
+ `app/src/app/App.tsx`, `app/src/pages/booking/model/bookingSlice.ts`, `app/src/pages/booking/model/bookingSlice.test.ts`, минимально `app/src/app/store/store.ts` / `hooks.ts`, `app/src/pages/booking/api/bookingService.ts`, `app/src/pages/booking/ui/BookingResult.tsx`, `app/src/pages/booking/ui/BookingReview.tsx`, минимально BookingSummary.tsx / `styles.css` для вывода состояний. Модель **не менять** без реального дефекта, документировать любое расширение ее API. Redux Toolkit обязателен. Не подключать backend, router, Zustand, React Query или RTK Query.
+
+Также разрешены `app/src/pages/booking/ui/BookingPage.tsx`, `app/src/pages/booking/index.ts`, минимально `app/src/app/store/selectors.ts`, `app/src/app/store/bookingIntegration.test.tsx`. Проверки с Provider/store принадлежат `app`, reducer-тесты не импортируют приложение. SSR этих связей не заменяет DOM-проверки U03/U04/U10.
 
 ## Gate
 

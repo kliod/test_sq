@@ -3,8 +3,12 @@
   FULL_TICKET_MIN_AGE,
   getTicketPrice,
   parseAge,
-} from "./bookingModel";
-import type { Booking, BookingFormValues, Participant } from "./bookingModel";
+} from "../model/bookingModel";
+import type {
+  Booking,
+  BookingFormValues,
+  Participant,
+} from "../model/bookingModel";
 
 const money = (value: number) =>
   new Intl.NumberFormat("ru-RU", {

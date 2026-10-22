@@ -9,25 +9,37 @@ app/
   docs/UI_SYSTEM.md             # Итог задачи 02
   docs/SKILL_USAGE.md           # Подтверждение обращения к скиллу
   src/
-    main.tsx
-    App.tsx                    # Единственный владелец useForm и inFlightRef; dispatch переходов
-    state/
-      store.ts                 # configureStore, фабрика store, RootState, AppDispatch
-      hooks.ts                 # Типизированные useAppDispatch/useAppSelector
-    booking/
-      bookingSlice.ts          # Redux Toolkit: состояние сценария и переходы
-      bookingSlice.test.ts     # Допустимые переходы и защита инвариантов
-      bookingModel.ts          # Чистые типы, валидация, тарифы, сравнение
-      bookingModel.test.ts
-      bookingService.ts        # Mock-сервис, режимы и типы результата
-      BookingForm.tsx          # Участники и общий email
-      BookingSummary.tsx       # Сводка из формы либо Booking
-      BookingReview.tsx        # Нередактируемая проверка нормализованного Booking
-      BookingResult.tsx        # Успех или отказ
-    styles.css                 # Один основной источник визуальных стилей
+    main.tsx                   # Тонкий вход через app/index.ts
+    app/
+      index.ts                 # Подключение приложения и глобального CSS
+      App.tsx                  # Единственный владелец useForm и inFlightRef; dispatch переходов
+      providers/AppProviders.tsx # Один Provider; в тестах принимает отдельный store
+      store/
+        store.ts               # configureStore, фабрика store, RootState, AppDispatch
+        hooks.ts               # Типизированные useAppDispatch/useAppSelector
+        selectors.ts           # Корневые селекторы с RootState
+        bookingIntegration.test.tsx # Связи Provider/store/страницы/сервиса через SSR
+      styles/styles.css        # Один основной источник визуальных стилей
+    pages/booking/
+      index.ts                 # Явный публичный API для app
+      model/
+        bookingSlice.ts        # Redux Toolkit: состояние сценария и переходы
+        bookingSlice.test.ts   # Допустимые переходы и защита инвариантов
+        bookingModel.ts        # Чистые типы, валидация, тарифы, сравнение
+        bookingModel.test.ts
+      api/
+        bookingService.ts      # Mock-сервис, режимы и типы результата
+      ui/
+        BookingPage.tsx        # Представление текущего шага, данные и обработчики через props
+        BookingForm.tsx        # Участники и общий email
+        BookingSummary.tsx     # Сводка из формы либо Booking
+        BookingReview.tsx      # Нередактируемая проверка нормализованного Booking
+        BookingResult.tsx      # Успех или отказ
 ```
 
 Не нужно создавать каждую необязательную папку или файл заранее. Названия выше задают владельцев ответственности. `ParticipantFields.tsx` можно выделить из `BookingForm`, если уменьшает повторение, но не делать библиотеку компонентов.
+
+Сборка приложения находится в слое `app`, сценарий целиком — в слайсе `pages/booking`. Внешние потребители используют его `index.ts`; внутренние файлы используют прямые относительные импорты. `pages/booking` не импортирует store, hooks или `RootState` из `app`, включая типы и тесты. Подробные границы — в [DECOMPOSITION.md](DECOMPOSITION.md).
 
 ## Типы и контракт чистой модели
 
@@ -73,7 +85,9 @@ type BookingStep = 'editing' | 'review' | 'submitting' | 'success' | 'soldOut';
 
 ## Redux Toolkit: состояние сценария
 
-Базовый менеджер состояния — **Redux Toolkit** (`@reduxjs/toolkit`) с React Redux (`react-redux`). Один `configureStore` создается вне рендера, `Provider` подключается в `main.tsx`. `RootState` и `AppDispatch` выводятся из store; компоненты используют типизированные `useAppSelector` и `useAppDispatch`. Для тестов фабрика создает отдельный store на каждый запуск. Основа настройки — [официальная документация Redux Toolkit](https://redux-toolkit.js.org/usage/usage-with-typescript/).
+Пути в этом разделе указаны от `app/src/`.
+
+Базовый менеджер состояния — **Redux Toolkit** (`@reduxjs/toolkit`) с React Redux (`react-redux`). Один `configureStore` создается вне рендера в `app/store/store.ts`; `Provider` подключается через `app/providers/AppProviders.tsx` в `main.tsx`. `RootState` и `AppDispatch` выводятся из store; типизированные `useAppSelector` и `useAppDispatch` использует `App`, а `BookingPage` получает данные и обработчики через props. Корневые селекторы с `RootState` находятся в `app/store/selectors.ts`; reducer не зависит от корневого типа приложения. Для тестов фабрика создает отдельный store на каждый запуск, `AppProviders` принимает его через prop. Основа настройки — [официальная документация Redux Toolkit](https://redux-toolkit.js.org/usage/usage-with-typescript/).
 
 `bookingSlice.ts` через `createSlice` владеет только сериализуемым состоянием:
 

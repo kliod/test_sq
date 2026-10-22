@@ -1,28 +1,22 @@
 import { useEffect, useRef } from "react";
 import type { FormEvent } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import BookingForm from "./booking/BookingForm";
-import BookingSummary from "./booking/BookingSummary";
-import BookingResult from "./booking/BookingResult";
-import { createBookingService } from "./booking/bookingService";
-import type { BookingService } from "./booking/bookingService";
-import BookingReview from "./booking/BookingReview";
 import {
+  BookingPage,
+  createBookingService,
   MAX_PARTICIPANTS,
   MIN_PARTICIPANTS,
   validateAndNormalize,
   isSameBooking,
-} from "./booking/bookingModel";
-import type { BookingFormValues } from "./booking/bookingModel";
-import {
   editBooking,
   startConfirmation,
   confirmationFinished,
   confirmationFailed,
   reviewBooking,
-  selectBookingFlow,
-} from "./booking/bookingSlice";
-import { useAppDispatch, useAppSelector } from "./state/hooks";
+} from "../pages/booking";
+import type { BookingFormValues, BookingService } from "../pages/booking";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
+import { selectBookingFlow } from "./store/selectors";
 
 export default function App({ service }: { service?: BookingService } = {}) {
   const serviceRef = useRef<BookingService | null>(null);
@@ -158,58 +152,20 @@ export default function App({ service }: { service?: BookingService } = {}) {
     clearErrors();
   }
   return (
-    <main>
-      <p>Вечер открытий — демонстрационное мероприятие</p>
-      {flow.step === "success" && flow.reviewedBooking && flow.reference ? (
-        <BookingResult
-          kind="success"
-          booking={flow.reviewedBooking}
-          reference={flow.reference}
-        />
-      ) : flow.step === "soldOut" && flow.reviewedBooking ? (
-        <BookingResult
-          kind="soldOut"
-          booking={flow.reviewedBooking}
-          onEdit={returnToEditing}
-          onRetry={confirmOrder}
-        />
-      ) : (flow.step === "review" || flow.step === "submitting") &&
-        flow.reviewedBooking ? (
-        <BookingReview
-          booking={flow.reviewedBooking}
-          onEdit={returnToEditing}
-          onConfirm={confirmOrder}
-          pending={flow.step === "submitting"}
-          error={flow.submitError}
-        />
-      ) : (
-        <>
-          <h1 ref={editingHeading} tabIndex={-1}>
-            Оформление билетов
-          </h1>
-          <p>
-            Детский билет — 1 000 руб. (младше 14 лет), полный — 2 000 руб. (от
-            14 лет).
-          </p>
-          <form noValidate onSubmit={checkOrder}>
-            <p role="alert">
-              {Object.keys(errors).length > 0
-                ? "Проверьте данные — исправьте ошибки, указанные рядом с полями и участниками."
-                : ""}
-            </p>
-            <BookingForm
-              fields={fields}
-              register={register}
-              errors={errors}
-              onAdd={addParticipant}
-              onRemove={removeParticipant}
-            />
-            <BookingSummary values={values} />
-            <button type="submit">Проверить заказ</button>
-          </form>
-        </>
-      )}
-      <p>Это демонстрация. Оплата и реальное бронирование не выполняются.</p>
-    </main>
+    <BookingPage
+      flow={flow}
+      editing={{
+        fields,
+        register,
+        errors,
+        values,
+        headingRef: editingHeading,
+        onSubmit: checkOrder,
+        onAdd: addParticipant,
+        onRemove: removeParticipant,
+      }}
+      onEdit={returnToEditing}
+      onConfirm={confirmOrder}
+    />
   );
 }

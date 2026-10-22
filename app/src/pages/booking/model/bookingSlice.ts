@@ -1,8 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { ConfirmResult } from "./bookingService";
+import type { ConfirmResult } from "../api/bookingService";
 import type { Booking } from "./bookingModel";
-import type { RootState } from "../state/store";
 
 export type BookingFlowState = {
   step: "editing" | "review" | "submitting" | "success" | "soldOut";
@@ -76,5 +75,4 @@ export const {
   confirmationFinished,
   confirmationFailed,
 } = bookingSlice.actions;
-export const selectBookingFlow = (state: RootState) => state.booking;
 export default bookingSlice.reducer;
